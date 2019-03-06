@@ -100,7 +100,8 @@ def train_main(dataset,
                sample_every=100,
                run_name='run1',
                restore_from='latest',
-               save_every=1000):
+               save_every=1000,
+               iterations=10000):
 
     enc = encoder.get_encoder(model_name)
     hparams = model.default_hparams()
@@ -160,7 +161,7 @@ def train_main(dataset,
         chunks = load_dataset(enc, dataset)
         data_sampler = Sampler(chunks)
         print('dataset has', data_sampler.total_size, 'tokens')
-        print('Training...')
+        print('Training', iterations, 'iterations...')
 
         counter = 1
         if os.path.exists(os.path.join(CHECKPOINT_DIR, run_name, 'counter')):
@@ -207,10 +208,11 @@ def train_main(dataset,
         start_time = time.time()
 
         try:
-            while True:
+            while counter <= iterations:
                 if counter % save_every == 0:
                     save()
                 if counter % sample_every == 0:
+                    print('Sampling...')
                     generate_samples()
 
                 batch = [data_sampler.sample(1024) for _ in range(batch_size)]
